@@ -1,0 +1,10 @@
+# household-finance-manager/requirements.txt
+
+# Django Framework
+django
+
+# PostgreSQL adapter for Python
+psycopg2-binary
+
+# Library to load environment variables from .env file
+python-dotenv

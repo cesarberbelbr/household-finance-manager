@@ -1,0 +1,34 @@
+services:
+  # Django web application service
+  web:
+    build: .
+    # Command to run the development server
+    command: python manage.py runserver 0.0.0.0:8000
+    # This new command will make the container wait indefinitely
+    # command: tail -f /dev/null
+    # Volume to sync local code with the container
+    volumes:
+      - .:/app
+    # Port mapping from host to container
+    ports:
+      - "8000:8000"
+    # Environment variables from .env file
+    env_file:
+      - .env
+    # Dependency on the database service
+    depends_on:
+      - db
+
+  # PostgreSQL database service
+  db:
+    image: postgres:15
+    # Volume to persist database data
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    # Environment variables for the database
+    env_file:
+      - .env
+
+volumes:
+  # Define the named volume for data persistence
+  postgres_data:
