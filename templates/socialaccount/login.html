@@ -1,0 +1,25 @@
+<!-- templates/socialaccount/login.html -->
+
+{% extends "base.html" %}
+{% load crispy_forms_tags %} <!-- Load the crispy tags -->
+
+{% block title %}Social Login{% endblock %}
+
+{% block content %}
+    {% if process == "connect" %}
+        <h2 class="card-title text-center mb-4">Connect {{ provider.name }}</h2>
+        <p>You are about to connect your {{ provider.name }} account to your local account.</p>
+    {% else %}
+        <h2 class="card-title text-center mb-4">Login with {{ provider.name }}</h2>
+        <p>You are about to sign in using your {{ provider.name }} account.</p>
+    {% endif %}
+
+    <form method="post">
+        {% csrf_token %}
+        <!-- Render any error messages or confirmation fields beautifully -->
+        {{ form|crispy }}
+        <div class="d-grid">
+            <button class="btn btn-primary" type="submit">Continue</button>
+        </div>
+    </form>
+{% endblock %}

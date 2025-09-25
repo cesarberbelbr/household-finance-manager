@@ -8,3 +8,19 @@ psycopg2-binary
 
 # Library to load environment variables from .env file
 python-dotenv
+
+# Library for authentication, registration, and social accounts
+django-allauth
+
+# HTTP library needed by django-allauth for social providers
+requests
+
+# Library for handling JSON Web Tokens (JWT), needed by Google provider
+PyJWT
+
+# Core library for cryptographic operations, a dependency of PyJWT
+cryptography
+
+# For rendering beautiful forms with Bootstrap
+django-crispy-forms
+crispy-bootstrap5

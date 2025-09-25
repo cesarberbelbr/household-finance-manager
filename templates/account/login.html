@@ -1,0 +1,29 @@
+<!-- templates/account/login.html -->
+
+{% extends "base.html" %}
+{% load socialaccount %}
+{% load crispy_forms_tags %} <!-- Load the crispy tags -->
+
+{% block title %}Login{% endblock %}
+
+{% block content %}
+    <h2 class="card-title text-center mb-4">Login</h2>
+
+    <form method="post" action="{% url 'account_login' %}">
+        {% csrf_token %}
+        <!-- This one tag renders the entire form with Bootstrap classes -->
+        {{ form|crispy }}
+        <div class="d-grid">
+            <button class="btn btn-primary" type="submit">Login</button>
+        </div>
+    </form>
+
+    <hr class="my-4">
+
+    <div class="text-center">
+        <p>Or Login With:</p>
+        <a class="btn btn-danger w-100" href="{% provider_login_url 'google' %}">
+            <i class="bi bi-google"></i> Login with Google
+        </a>
+    </div>
+{% endblock %}

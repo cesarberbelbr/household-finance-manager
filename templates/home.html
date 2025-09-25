@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block title %}Home{% endblock %}
+
+{% block content %}
+    {% if user.is_authenticated %}
+        <!-- Message for logged-in users -->
+        <h2>Welcome, {{ user.email }}!</h2>
+        <p>This is your financial dashboard. More features coming soon!</p>
+    {% else %}
+        <!-- Message for anonymous users -->
+        <h2>Welcome to the Household Finance Manager</h2>
+        <p>Please <a href="{% url 'account_login' %}">login</a> or <a href="{% url 'account_signup' %}">sign up</a> to manage your finances.</p>
+    {% endif %}
+{% endblock %}

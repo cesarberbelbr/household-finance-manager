@@ -1,0 +1,19 @@
+<!-- templates/account/signup.html -->
+
+{% extends "base.html" %}
+{% load crispy_forms_tags %} <!-- Load the crispy tags -->
+
+{% block title %}Sign Up{% endblock %}
+
+{% block content %}
+    <h2 class="card-title text-center mb-4">Sign Up</h2>
+
+    <form method="post" action="{% url 'account_signup' %}">
+        {% csrf_token %}
+        <!-- Render the form using crispy -->
+        {{ form|crispy }}
+        <div class="d-grid">
+            <button class="btn btn-primary" type="submit">Sign Up</button>
+        </div>
+    </form>
+{% endblock %}
