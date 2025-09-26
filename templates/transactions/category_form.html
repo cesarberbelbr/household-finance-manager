@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+
+<!--
+The title block dynamically changes based on whether we are editing an existing object
+or creating a new one. The 'object' variable is passed by Django's generic views.
+It's None for CreateView and contains the instance for UpdateView.
+-->
+{% block title %}{% if object %}Edit Category{% else %}Create New Category{% endif %}{% endblock %}
+
+{% block content %}
+    <h2 class="card-title text-center mb-4">
+        {% if object %}
+            Edit Category
+        {% else %}
+            Create New Category
+        {% endif %}
+    </h2>
+
+    <!--
+    The form tag doesn't need an 'action' attribute because Django's Class-Based Views
+    handle the form submission to the same URL it was rendered from.
+    -->
+    <form method="post">
+        {% csrf_token %}
+
+        <!--
+        The |crispy filter does all the heavy lifting:
+        - Renders labels for each field.
+        - Wraps fields in Bootstrap's form-group divs.
+        - Adds Bootstrap classes (form-control, form-select) to the input fields.
+        - Displays any validation errors.
+        -->
+        {{ form|crispy }}
+
+        <div class="d-grid mt-4">
+            <button type="submit" class="btn btn-primary">
+                {% if object %}
+                    Save Changes
+                {% else %}
+                    Create Category
+                {% endif %}
+            </button>
+        </div>
+    </form>
+{% endblock %}

@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+{% block title %}{% if object %}Edit Transaction{% else %}Create Transaction{% endif %}{% endblock %}
+
+{% block content %}
+    <h2 class="card-title mb-4">{% if object %}Edit Transaction{% else %}Create Transaction{% endif %}</h2>
+    <form method="post">
+        {% csrf_token %}
+        {{ form|crispy }}
+        <div class="d-grid">
+            <button type="submit" class="btn btn-primary mt-3">Save Transaction</button>
+        </div>
+    </form>
+{% endblock %}

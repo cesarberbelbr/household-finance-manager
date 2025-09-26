@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}Delete Transaction{% endblock %}
+
+{% block content %}
+    <h2 class="card-title mb-4">Delete Transaction</h2>
+    <p>
+        Are you sure you want to delete the {{ object.transaction_type|lower }} of
+        <strong>${{ object.amount|floatformat:2 }}</strong> from account
+        <strong>"{{ object.account.name }}"</strong> on
+        <strong>{{ object.date|date:"Y-m-d" }}</strong>?
+    </p>
+    <p><strong>This action cannot be undone.</strong></p>
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">Confirm Delete</button>
+        <a href="{% url 'transactions:transaction_list' %}" class="btn btn-secondary">Cancel</a>
+    </form>
+{% endblock %}
