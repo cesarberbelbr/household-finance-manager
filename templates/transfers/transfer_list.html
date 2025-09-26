@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}My Transfers{% endblock %}
+{% block content %}
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="card-title mb-0">My Transfers</h2>
+        <a href="{% url 'transfers:transfer_create' %}" class="btn btn-primary">New Transfer</a>
+    </div>
+    {% for transfer in transfers %}
+    <div class="card mb-2">
+        <div class="card-body">
+            <p><strong>Date:</strong> {{ transfer.date|date:"Y-m-d" }}</p>
+            <p><strong>From:</strong> {{ transfer.from_account.name }}</p>
+            <p><strong>To:</strong> {{ transfer.to_account.name }}</p>
+            <p><strong>Amount:</strong> ${{ transfer.amount|floatformat:2 }}</p>
+            {% if transfer.description %}<p class="text-muted">{{ transfer.description }}</p>{% endif %}
+            <a href="{% url 'transfers:transfer_delete' pk=transfer.pk %}" class="btn btn-danger btn-sm">Delete</a>
+        </div>
+    </div>
+    {% empty %}
+    <p>You haven't recorded any transfers yet.</p>
+    {% endfor %}
+{% endblock %}
