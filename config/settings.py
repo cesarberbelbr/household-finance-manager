@@ -51,6 +51,9 @@ INSTALLED_APPS = [
     'allauth.socialaccount.providers.google',
 
     'users',  # Custom user app
+    'accounts', # Accounts app to manage user accounts
+    'transactions', # Transactions app to manage user transactions
+    'transfers', # Transfers app to manage user transfers
 ]
 
 MIDDLEWARE = [
