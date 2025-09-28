@@ -35,6 +35,40 @@ class Transaction(models.Model):
     class TransactionType(models.TextChoices):
         INCOME = 'INCOME', 'Income'
         EXPENSE = 'EXPENSE', 'Expense'
+        TRANSFER = 'TRANSFER', 'Transfer'
+
+    class Frequency(models.TextChoices):
+        NONE = 'NONE', 'None' # Transação Única
+        INSTALLMENT = 'INSTALLMENT', 'Parcelado' # Despesa parcelada
+        FIXED = 'FIXED', 'Mensal Fixo'   # Recorrência mensal fixa
+
+    class Status(models.TextChoices):
+        PENDING = 'PENDING', 'Pendente'
+        COMPLETED = 'COMPLETED', 'Efetivada'
+    
+    status = models.CharField(
+        max_length=10,
+        choices=Status.choices,
+        default=Status.PENDING
+    )
+
+    installment_number = models.PositiveIntegerField(
+        null=True, blank=True,
+        help_text="The number of the current installment (e.g., 1, 2, 3)."
+    )
+    completion_date = models.DateField(
+        null=True, blank=True,
+        help_text="The date when the transaction was actually completed/cleared."
+    )
+
+    recurrence_id = models.UUIDField(null=True, blank=True, editable=False)
+
+    frequency = models.CharField(
+        max_length=20, # Aumentado para acomodar 'INSTALLMENT'
+        choices=Frequency.choices,
+        default=Frequency.NONE
+    )
+    installments = models.PositiveIntegerField(default=1) # Este campo agora representa o TOTAL de parcelas
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     user = models.ForeignKey(
@@ -47,8 +81,19 @@ class Transaction(models.Model):
         on_delete=models.CASCADE,
         related_name='transactions'
     )
+        # A conta de destino. Só é usado para Transferências.
+    to_account = models.ForeignKey(
+        Account,
+        on_delete=models.CASCADE,
+        related_name='incoming_transfers',
+        null=True,
+        blank=True
+    )
+    
+    # Para vincular as duas "pernas" de uma transferência
+    transfer_id = models.UUIDField(null=True, blank=True, editable=False)
     transaction_type = models.CharField(
-        max_length=7,
+        max_length=8,
         choices=TransactionType.choices
     )
     amount = models.DecimalField(
@@ -56,13 +101,13 @@ class Transaction(models.Model):
         decimal_places=2,
         help_text="The transaction amount. Always a positive value."
     )
-    date = models.DateField()
+    date = models.DateField(help_text="For recurring transactions, this is the date of the first installment.")
     category = models.ForeignKey(
         Category,
         on_delete=models.SET_NULL, # If category is deleted, don't delete transaction
         null=True,
         blank=True
-    )
+    )  
     description = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 

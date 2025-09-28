@@ -9,5 +9,6 @@ urlpatterns = [
     path('auth/', include('allauth.urls')), # Renamed for clarity
     path('accounts/', include('accounts.urls', namespace='accounts')),
     path('transactions/', include('transactions.urls', namespace='transactions')),
-    path('transfers/', include('transfers.urls', namespace='transfers')),
+    # path('transfers/', include('transfers.urls', namespace='transfers')),
+    # path('recurring/', include('recurring.urls', namespace='recurring')), 
 ]

@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}Recurring Transactions{% endblock %}
+{% block content %}
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="card-title mb-0">Recurring Transactions</h2>
+        <a href="{% url 'recurring:recurring_transaction_create' %}" class="btn btn-primary">Add New Recurrence</a>
+    </div>
+    {% for rt in recurring_transactions %}
+    <div class="card mb-3">
+        <div class="card-body">
+            <h5 class="card-title {% if rt.transaction_type == 'INCOME' %}text-success{% else %}text-danger{% endif %}">
+                {{ rt.transaction_type|title }}: ${{ rt.amount|floatformat:2 }}
+            </h5>
+            <h6 class="card-subtitle mb-2 text-muted">
+                Frequency: {{ rt.get_frequency_display }}
+            </h6>
+            <p class="card-text mb-1">
+                <strong>Account:</strong> {{ rt.account.name }}<br>
+                <strong>Category:</strong> {{ rt.category.name|default:"N/A" }}<br>
+                <strong>Starts:</strong> {{ rt.start_date|date:"Y-m-d" }} |
+                <strong>Ends:</strong> {{ rt.end_date|date:"Y-m-d"|default:"Never" }}
+            </p>
+            <a href="{% url 'recurring:recurring_transaction_update' pk=rt.pk %}" class="btn btn-secondary btn-sm">Edit</a>
+            <a href="{% url 'recurring:recurring_transaction_delete' pk=rt.pk %}" class="btn btn-danger btn-sm">Delete</a>
+        </div>
+    </div>
+    {% empty %}
+    <p>You haven't set up any recurring transactions yet.</p>
+    {% endfor %}
+{% endblock %}

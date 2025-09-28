@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 from pathlib import Path
 import os
 from dotenv import load_dotenv
+from celery.schedules import crontab
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -53,7 +54,8 @@ INSTALLED_APPS = [
     'users',  # Custom user app
     'accounts', # Accounts app to manage user accounts
     'transactions', # Transactions app to manage user transactions
-    'transfers', # Transfers app to manage user transfers
+    # 'transfers', # Transfers app to manage user transfers
+    # 'recurring', # Recurring transactions app
 ]
 
 MIDDLEWARE = [
@@ -160,11 +162,14 @@ AUTHENTICATION_BACKENDS = [
 # Allauth specific settings
 LOGIN_REDIRECT_URL = '/' # Redirect to home page after login
 ACCOUNT_LOGOUT_REDIRECT_URL = '/'
-ACCOUNT_EMAIL_REQUIRED = True
-ACCOUNT_USERNAME_REQUIRED = False
-ACCOUNT_AUTHENTICATION_METHOD = 'email'
 ACCOUNT_EMAIL_VERIFICATION = 'optional' # or 'mandatory'
 ACCOUNT_LOGOUT_ON_GET = False
+ACCOUNT_LOGIN_METHODS = {'email'}
+ACCOUNT_SIGNUP_FIELDS = ['email*', 'password1*', 'password2*']
+
+# ACCOUNT_AUTHENTICATION_METHOD = 'email'
+# ACCOUNT_EMAIL_REQUIRED = True
+# ACCOUNT_USERNAME_REQUIRED = False
 
 # Social Account (Google) specific settings
 SOCIALACCOUNT_PROVIDERS = {
@@ -181,3 +186,22 @@ SOCIALACCOUNT_PROVIDERS = {
 
 CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
 CRISPY_TEMPLATE_PACK = "bootstrap5"
+
+# CELERY SETTINGS
+# ------------------------------------------------------------------------------
+# Using Redis as the broker
+CELERY_BROKER_URL = "redis://redis:6379/0"
+CELERY_RESULT_BACKEND = "redis://redis:6379/0"
+CELERY_ACCEPT_CONTENT = ["json"]
+CELERY_TASK_SERIALIZER = "json"
+CELERY_RESULT_SERIALIZER = "json"
+CELERY_TIMEZONE = "UTC" # Or your preferred timezone
+
+# Celery Beat (Scheduler) settings
+CELERY_BEAT_SCHEDULE = {
+    # A única tarefa agendada agora é a de efetivação.
+    'efetivar-transacoes-pendentes-diariamente': {
+        'task': 'transactions.tasks.efetivar_transacoes_pendentes',
+        'schedule': crontab(minute=10, hour=0),
+    },
+}

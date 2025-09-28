@@ -24,6 +24,7 @@ class AccountCreateView(LoginRequiredMixin, CreateView):
     def form_valid(self, form):
         # Assign the current user to the new account
         form.instance.user = self.request.user
+        form.instance.balance = form.cleaned_data['initial_balance']
         return super().form_valid(form)
 
 class AccountUpdateView(LoginRequiredMixin, UpdateView):

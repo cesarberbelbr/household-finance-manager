@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+{% block title %}{% if object %}Edit Recurrence{% else %}Create Recurrence{% endif %}{% endblock %}
+
+{% block content %}
+    <h2 class="card-title mb-4">{% if object %}Edit Recurrence{% else %}Create New Recurrence{% endif %}</h2>
+    <form method="post">
+        {% csrf_token %}
+        {{ form|crispy }}
+        <p class="text-muted mt-3"><small>Note: Date fields for Start and End should be in YYYY-MM-DD format.</small></p>
+        <div class="d-grid">
+            <button type="submit" class="btn btn-primary mt-3">Save Recurrence</button>
+        </div>
+    </form>
+{% endblock %}

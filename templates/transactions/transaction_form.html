@@ -1,14 +1,117 @@
 {% extends "base.html" %}
 {% load crispy_forms_tags %}
-{% block title %}{% if object %}Edit Transaction{% else %}Create Transaction{% endif %}{% endblock %}
+
+{% comment %}
+Este template serve tanto para criar uma nova transação (única ou a "mãe" de uma recorrência)
+quanto para editar uma regra de recorrência existente. A lógica de qual view o renderiza
+está em transactions/views.py.
+{% endcomment %}
+
+{% block title %}
+    {% if object %}
+        Edit Transaction Rule
+    {% else %}
+        Create New Transaction
+    {% endif %}
+{% endblock %}
 
 {% block content %}
-    <h2 class="card-title mb-4">{% if object %}Edit Transaction{% else %}Create Transaction{% endif %}</h2>
+    <h2 class="card-title text-center mb-4">
+        {% if object %}
+            Edit Transaction Rule
+        {% else %}
+            Create New Transaction
+        {% endif %}
+    </h2>
+
+    {% comment %}
+    O formulário é renderizado usando nosso TransactionForm customizado.
+    O crispy_forms_tags se encarrega de aplicar as classes do Bootstrap
+    e criar a estrutura HTML correta para cada campo.
+    {% endcomment %}
     <form method="post">
         {% csrf_token %}
+
         {{ form|crispy }}
-        <div class="d-grid">
-            <button type="submit" class="btn btn-primary mt-3">Save Transaction</button>
+
+        <div class="d-grid mt-4">
+            <button type="submit" class="btn btn-primary">
+                {% if object %}
+                    Save Changes
+                {% else %}
+                    Create Transaction
+                {% endif %}
+            </button>
         </div>
     </form>
+{% endblock %}
+
+
+{% block extra_js %}
+{% comment %}
+Este bloco de JavaScript é o cérebro da interatividade do formulário.
+Ele mostra e esconde os campos de recorrência com base nas seleções do usuário.
+Ele precisa que o 'base.html' tenha um bloco {% block extra_js %}{% endblock %}
+no final do body para funcionar.
+{% endcomment %}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // ===================================================================
+        // 1. SELECIONA TODOS OS ELEMENTOS DO FORMULÁRIO
+        // ===================================================================
+        const transactionTypeSelect = document.getElementById('id_transaction_type');
+        const isRecurringCheckbox = document.getElementById('id_is_recurring');
+        const frequencySelect = document.getElementById('id_frequency');
+        
+        // As divs que o crispy-forms cria para os campos
+        const toAccountDiv = document.getElementById('div_id_to_account');
+        const categoryDiv = document.getElementById('div_id_category'); // Também precisamos controlar a categoria
+        const frequencyDiv = document.getElementById('div_id_frequency');
+        const installmentsDiv = document.getElementById('div_id_installments');
+
+        // ===================================================================
+        // 2. FUNÇÃO PRINCIPAL QUE CONTROLA A VISIBILIDADE DE TODOS OS CAMPOS
+        // ===================================================================
+        function toggleDynamicFields() {
+            const currentType = transactionTypeSelect.value;
+            const isRecurring = isRecurringCheckbox.checked;
+
+            // --- Lógica para o tipo de Transação (Transfer vs. Outros) ---
+            if (currentType === 'TRANSFER') {
+                toAccountDiv.style.display = 'block';   // Mostra a conta de destino
+                categoryDiv.style.display = 'none';   // Esconde a categoria (não faz sentido para transferências)
+            } else {
+                toAccountDiv.style.display = 'none';    // Esconde a conta de destino
+                categoryDiv.style.display = 'block';  // Mostra a categoria
+            }
+
+            // --- Lógica para Recorrência (exatamente como antes) ---
+            if (isRecurring) {
+                frequencyDiv.style.display = 'block'; // Mostra o seletor de frequência
+                
+                // Mostra o campo de parcelas APENAS se a frequência for 'Parcelado'
+                if (frequencySelect.value === 'INSTALLMENT') {
+                    installmentsDiv.style.display = 'block';
+                } else {
+                    installmentsDiv.style.display = 'none';
+                }
+            } else {
+                frequencyDiv.style.display = 'none';
+                installmentsDiv.style.display = 'none';
+            }
+        }
+
+        // ===================================================================
+        // 3. ADICIONA OS "GATILHOS" (EVENT LISTENERS)
+        // ===================================================================
+        
+        // Executa a função uma vez no carregamento para definir o estado inicial correto
+        toggleDynamicFields();
+
+        // Adiciona um listener para CADA campo que afeta a visibilidade de outros
+        transactionTypeSelect.addEventListener('change', toggleDynamicFields);
+        isRecurringCheckbox.addEventListener('change', toggleDynamicFields);
+        frequencySelect.addEventListener('change', toggleDynamicFields);
+    });
+</script>
 {% endblock %}

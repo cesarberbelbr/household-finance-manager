@@ -1,48 +1,113 @@
 {% extends "base.html" %}
-{% block title %}My Transactions{% endblock %}
+
+{% comment %}
+Este template exibe uma lista unificada de todas as operações financeiras,
+incluindo receitas, despesas e transferências. Ele também mostra projeções
+de transações fixas mensais para planejamento futuro.
+{% endcomment %}
+
+{% block title %}Transactions - {{ current_month|date:"F Y" }}{% endblock %}
+
 {% block content %}
+    <!-- =================================================================== -->
+    <!-- NAVEGAÇÃO DO MÊS -->
+    <!-- =================================================================== -->
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="card-title mb-0">My Transactions</h2>
-        <a href="{% url 'transactions:transaction_create' %}" class="btn btn-primary">Add New Transaction</a>
+        <a href="?year={{ prev_month.year }}&month={{ prev_month.month }}" class="btn btn-outline-secondary">&laquo; {{ prev_month|date:"F Y" }}</a>
+        <h2 class="card-title mb-0">{{ current_month|date:"F Y" }}</h2>
+        <a href="?year={{ next_month.year }}&month={{ next_month.month }}" class="btn btn-outline-secondary">{{ next_month|date:"F Y" }} &raquo;</a>
     </div>
 
+    <!-- =================================================================== -->
+    <!-- BOTÃO DE AÇÃO PRINCIPAL -->
+    <!-- =================================================================== -->
+    <div class="d-grid mb-4">
+        <a href="{% url 'transactions:transaction_create' %}" class="btn btn-primary btn-lg">Add New Operation</a>
+    </div>
+
+    <!-- =================================================================== -->
+    <!-- TABELA DE TRANSAÇÕES -->
+    <!-- =================================================================== -->
     <div class="table-responsive">
-        <table class="table table-striped table-hover">
-            <thead>
+        <table class="table table-striped table-hover align-middle">
+            <thead class="table-light">
                 <tr>
-                    <th>Date</th>
-                    <th>Account</th>
-                    <th>Category</th>
-                    <th>Type</th>
-                    <th class="text-end">Amount</th>
-                    <th>Actions</th>
+                    <th scope="col">Date</th>
+                    <th scope="col">Account</th>
+                    <th scope="col">Operation / Category</th>
+                    <th scope="col" class="text-center">Status</th>
+                    <th scope="col" class="text-end">Amount</th>
+                    <th scope="col" class="text-center">Actions</th>
                 </tr>
             </thead>
             <tbody>
                 {% for transaction in transactions %}
                 <tr>
-                    <td>{{ transaction.date|date:"Y-m-d" }}</td>
+                    <!-- Data -->
+                    <td>{{ transaction.date|date:"d M, Y" }}</td>
+
+                    <!-- Conta -->
                     <td>{{ transaction.account.name }}</td>
-                    <td>{{ transaction.category }}</td>
+
+                    <!-- Descrição da Operação -->
                     <td>
-                        <span class="badge {% if transaction.transaction_type == 'INCOME' %}bg-success{% else %}bg-danger{% endif %}">
-                            {{ transaction.get_transaction_type_display }}
-                        </span>
+                        {% comment %}
+                        AQUI ESTÁ A LÓGICA CHAVE:
+                        - Se a transação tem um `transfer_id`, ela é parte de uma transferência.
+                        - Mostramos um ícone e a descrição gerada automaticamente.
+                        - Caso contrário, mostramos a categoria e a descrição normal.
+                        {% endcomment %}
+                        {% if transaction.transfer_id %}
+                            <span class="text-primary">
+                                <i class="bi bi-arrow-left-right"></i>
+                                <strong>Transfer</strong>
+                            </span>
+                            <small class="d-block text-muted">{{ transaction.description|truncatechars:40 }}</small>
+                        {% else %}
+                            <strong>{{ transaction.category.name|default:"-" }}</strong>
+                            <small class="d-block text-muted">{{ transaction.description|truncatechars:40 }}</small>
+                        {% endif %}
                     </td>
-                    <td class="text-end {% if transaction.transaction_type == 'INCOME' %}text-success{% else %}text-danger{% endif %}">
-                        {% if transaction.transaction_type == 'EXPENSE' %}-{% endif %}${{ transaction.amount|floatformat:2 }}
+
+                    <!-- Status -->
+                    <td class="text-center">
+                        {% if transaction.completion_date %}
+                             <span class="badge bg-success">Efetivada</span>
+                        {% else %}
+                             <span class="badge bg-warning text-dark">Pendente</span>
+                        {% endif %}
                     </td>
-                    <td>
-                        <a href="{% url 'transactions:transaction_update' pk=transaction.pk %}" class="btn btn-secondary btn-sm">Edit</a>
-                        <a href="{% url 'transactions:transaction_delete' pk=transaction.pk %}" class="btn btn-danger btn-sm">Delete</a>
+
+                    <!-- Valor -->
+                    <td class="text-end {% if transaction.transaction_type == 'INCOME' %}text-success{% else %}text-danger{% endif %} fw-bold">
+                        {% if transaction.transaction_type == 'EXPENSE' %}-{% else %}+{% endif %}
+                        ${{ transaction.amount|floatformat:2 }}
+                    </td>
+
+                    <!-- Ações -->
+                    <td class="text-center">
+                        {% if not transaction.completion_date %}
+                            <a href="{% url 'transactions:transaction_complete' pk=transaction.id %}" class="btn btn-success btn-sm" title="Mark as Completed">
+                                Efetivar
+                            </a>
+                        {% endif %}
                     </td>
                 </tr>
                 {% empty %}
                 <tr>
-                    <td colspan="6" class="text-center">You haven't recorded any transactions yet.</td>
+                    <td colspan="6" class="text-center py-5">
+                        <h5 class="text-muted">No operations found for this month.</h5>
+                        <p>Try adding a new operation or navigating to a different month.</p>
+                    </td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
     </div>
+
+    {% comment %}
+    NOTA: Para que os ícones <i class="bi bi-..."></i> funcionem,
+    certifique-se de que a biblioteca Bootstrap Icons está incluída no seu `base.html`.
+    Ex: <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    {% endcomment %}
 {% endblock %}

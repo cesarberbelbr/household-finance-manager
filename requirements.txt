@@ -24,3 +24,7 @@ cryptography
 # For rendering beautiful forms with Bootstrap
 django-crispy-forms
 crispy-bootstrap5
+
+# For background and scheduled tasks
+celery
+redis

@@ -28,6 +28,33 @@ services:
     # Environment variables for the database
     env_file:
       - .env
+# NEW SERVICE: Redis message broker
+  redis:
+    image: redis:7-alpine
+
+  # NEW SERVICE: Celery worker
+  celery_worker:
+    build: .
+    command: celery -A config worker --loglevel=info
+    volumes:
+      - .:/app
+    env_file:
+      - .env
+    depends_on:
+      - redis
+      - db
+
+  # NEW SERVICE: Celery scheduler
+  celery_beat:
+    build: .
+    command: celery -A config beat --loglevel=info --scheduler django_celery_beat.schedulers:DatabaseScheduler
+    volumes:
+      - .:/app
+    env_file:
+      - .env
+    depends_on:
+      - redis
+      - db
 
 volumes:
   # Define the named volume for data persistence

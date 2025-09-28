@@ -9,6 +9,7 @@ from .views import (
     CategoryCreateView,
     CategoryUpdateView,
     CategoryDeleteView,
+    complete_transaction,
 )
 
 app_name = 'transactions'
@@ -18,6 +19,7 @@ urlpatterns = [
     path('new/', TransactionCreateView.as_view(), name='transaction_create'),
     path('<uuid:pk>/edit/', TransactionUpdateView.as_view(), name='transaction_update'),
     path('<uuid:pk>/delete/', TransactionDeleteView.as_view(), name='transaction_delete'),
+    path('<uuid:pk>/complete/', complete_transaction, name='transaction_complete'),
 
     path('categories/', CategoryListView.as_view(), name='category_list'),
     path('categories/new/', CategoryCreateView.as_view(), name='category_create'),
